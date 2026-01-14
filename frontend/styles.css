@@ -1,0 +1,253 @@
+:root {
+    --primary: #c0392b; /* Hacettepe Kırmızısı */
+    --accent: #2980b9;
+    --bg: #f5f6fa;
+    --card-bg: #ffffff;
+    --text: #2d3436;
+    --shadow: 0 4px 15px rgba(0,0,0,0.1);
+}
+
+body { 
+    font-family: 'Inter', -apple-system, sans-serif; 
+    background: var(--bg); 
+    margin: 0; 
+    color: var(--text); 
+    line-height: 1.6;
+}
+
+.container { 
+    max-width: 1100px; 
+    margin: 0 auto; 
+    padding: 2rem; 
+}
+
+/* --- GİRİŞ EKRANI (LOGIN) --- */
+#login-view {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 80vh;
+}
+
+.login-card {
+    background: var(--card-bg);
+    padding: 2.5rem;
+    border-radius: 20px;
+    box-shadow: var(--shadow);
+    width: 100%;
+    max-width: 400px;
+    text-align: center;
+}
+
+/* --- HARİTA (GIS) --- */
+#map { 
+    height: 450px; 
+    width: 100%; 
+    border-radius: 15px; 
+    margin-bottom: 2rem; 
+    border: 4px solid white;
+    box-shadow: var(--shadow);
+    z-index: 1;
+}
+
+/* --- TOPLULUK SEÇİM KARTLARI --- */
+.card-grid { 
+    display: grid; 
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); 
+    gap: 1.5rem; 
+    margin-top: 2rem; 
+}
+
+.club-card {
+    background: var(--card-bg); 
+    padding: 2rem; 
+    border-radius: 15px; 
+    text-align: center;
+    box-shadow: var(--shadow); 
+    cursor: pointer; 
+    transition: all 0.3s ease;
+    border-top: 5px solid var(--primary);
+}
+
+.club-card:hover { 
+    transform: translateY(-8px); 
+    box-shadow: 0 12px 20px rgba(0,0,0,0.15); 
+}
+
+/* --- ETKİNLİK KARTLARI --- */
+.event-card {
+    background: white; 
+    border-radius: 15px; 
+    overflow: hidden; 
+    box-shadow: var(--shadow);
+    transition: 0.3s;
+}
+
+.event-card:hover { transform: scale(1.02); }
+
+.event-card img { 
+    width: 100%; 
+    height: 200px; 
+    object-fit: cover; 
+}
+
+.event-info { padding: 1.5rem; }
+
+/* --- FORM ELEMANLARI VE BUTONLAR --- */
+.search-bar { 
+    width: 100%; 
+    padding: 1rem; 
+    margin-bottom: 2rem; 
+    border: 2px solid #eee; 
+    border-radius: 12px; 
+    font-size: 1rem;
+    outline: none;
+    transition: 0.3s;
+}
+
+.search-bar:focus { border-color: var(--primary); }
+
+.btn {
+    display: inline-block; 
+    background: var(--primary); 
+    color: white; 
+    padding: 0.8rem 1.5rem; 
+    text-decoration: none; 
+    border-radius: 8px; 
+    font-weight: 600;
+    border: none;
+    cursor: pointer;
+    transition: 0.3s;
+}
+
+.btn:hover { background: #a93226; opacity: 0.9; }
+
+.btn-secondary { background: var(--accent); }
+
+/* --- RESPONSIVE AYARLAR --- */
+@media (max-width: 768px) {
+    .container { padding: 1rem; }
+    #map { height: 300px; }
+    .card-grid { grid-template-columns: 1fr; }
+} 
+:root {
+    --hacettepe-red: #d32f2f; /* Hacettepe Kırmızısı */
+    --hacettepe-dark: #b71c1c;
+    --bg-color: #f4f7f6;
+    --text-color: #333;
+}
+
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background-color: var(--bg-color);
+    margin: 0;
+    overflow-x: hidden;
+}
+
+/* Animasyonlu Giriş */
+@keyframes fadeInUp {
+    from { opacity: 0; transform: translateY(30px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.container {
+    max-width: 1000px;
+    margin: auto;
+    padding: 20px;
+    animation: fadeInUp 0.8s ease-out; /* Sayfa açılış animasyonu */
+}
+
+/* Hacettepe Logo ve Header Stili */
+.header-logo {
+    display: block;
+    margin: 0 auto 20px;
+    width: 120px;
+    transition: transform 0.3s ease;
+}
+
+.header-logo:hover {
+    transform: scale(1.1) rotate(5deg); /* Logoya mikro etkileşim */
+}
+
+/* Kartlar için Modern Stil */
+.login-card, .event-card, .club-card {
+    background: white;
+    border-radius: 15px;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+    padding: 2rem;
+    transition: all 0.3s ease;
+    border-bottom: 4px solid transparent;
+}
+
+.club-card:hover {
+    transform: translateY(-10px);
+    border-bottom: 4px solid var(--hacettepe-red);
+    box-shadow: 0 15px 35px rgba(211, 47, 47, 0.2);
+    cursor: pointer;
+}
+
+/* Buton Animasyonları */
+.btn {
+    background-color: var(--hacettepe-red);
+    color: white;
+    border: none;
+    border-radius: 8px;
+    padding: 12px 25px;
+    cursor: pointer;
+    font-weight: 600;
+    transition: background 0.3s, transform 0.2s;
+}
+
+.btn:hover {
+    background-color: var(--hacettepe-dark);
+    transform: scale(1.05);
+}
+
+.btn:active {
+    transform: scale(0.95);
+}
+
+/* Harita Alanı Görseli */
+#map {
+    height: 400px;
+    border-radius: 15px;
+    margin-bottom: 20px;
+    border: 3px solid white;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+}
+/* Topluluk Kartları İçin Özel Stil */
+.club-card {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    background: white;
+    border-radius: 15px;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+}
+
+/* Kart İçindeki Logo Görseli */
+.club-logo {
+    width: 100px;  /* Genişliği sabitliyoruz */
+    height: 100px; /* Yüksekliği sabitliyoruz */
+    object-fit: contain; /* Görselin bozulmadan sığmasını sağlar */
+    margin-bottom: 15px;
+    border-radius: 50%; /* Logoları yuvarlak yapmak istersen kullan */
+    background: #f9f9f9;
+    padding: 5px;
+}
+
+.club-card h2 {
+    margin: 0;
+    font-size: 1.2rem;
+    color: #333;
+}
+
+/* Kart Üzerine Gelince (Hover) */
+.club-card:hover {
+    transform: scale(1.05);
+    box-shadow: 0 8px 25px rgba(211, 47, 47, 0.3);
+}

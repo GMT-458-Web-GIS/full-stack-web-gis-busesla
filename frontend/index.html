@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="styles.css">
+    <title>Hacettepe Topluluk Portalı | Giriş & Kayıt</title>
+</head>
+<body>
+    <div class="container">
+        <div style="text-align: center; margin-bottom: 30px;">
+        <img src="https://itdb.hacettepe.edu.tr/dosyalar/hacettepe_logo.png" 
+            alt="Hacettepe Logo" 
+            class="header-logo"
+            onerror="this.src='https://via.placeholder.com/150?text=Hacettepe+Logo'">
+        <h1 style="color: #d32f2f; margin-top: 10px;">Etkinlik Portalı</h1>
+    </div>
+        
+        <div id="login-view" class="login-card" style="margin-top: 50px;">
+            <h1>Hoş Geldiniz 👋</h1>
+            <p>Devam etmek için giriş yapın</p>
+            <input type="email" id="loginEmail" class="search-bar" placeholder="E-posta Adresiniz">
+            <input type="password" id="loginPass" class="search-bar" placeholder="Şifreniz">
+            <button class="btn" onclick="handleLogin()" style="width: 100%;">Giriş Yap</button>
+            <p style="margin-top: 15px; font-size: 0.9rem;">
+                Hesabınız yok mu? <a href="#" onclick="showSection('register-view')">Kayıt Ol</a>
+            </p>
+        </div>
+
+        <div id="register-view" class="login-card" style="display: none; margin-top: 50px;">
+            <h1>Kayıt Ol 📝</h1>
+            <p>Hacettepe e-postanız ile kaydolun</p>
+            <input type="email" id="regEmail" class="search-bar" placeholder="E-posta">
+            <input type="password" id="regPass" class="search-bar" placeholder="Şifre Oluşturun">
+            <button class="btn" onclick="handleSignup()" style="width: 100%;">Kayıt Ol ve Kod Gönder</button>
+            <p style="margin-top: 15px; font-size: 0.9rem;">
+                Zaten üye misiniz? <a href="#" onclick="showSection('login-view')">Giriş Yap</a>
+            </p>
+        </div>
+
+        <div id="verify-view" class="login-card" style="display: none; margin-top: 50px;">
+            <h1>E-postanı Kontrol Et 📧</h1>
+            <p>Lütfen gönderilen 6 haneli kodu girin.</p>
+            <input type="text" id="otpCode" class="search-bar" placeholder="Doğrulama Kodu">
+            <button class="btn" onclick="handleVerify()" style="width: 100%;">Hesabı Doğrula</button>
+        </div>
+
+        <div id="selection-view" style="display:none; text-align:center; margin-top: 30px;">
+            <h2 id="welcome-text" style="color: #d32f2f;"></h2>
+            <p>Lütfen bir topluluk seçiniz:</p>
+    
+    <div class="card-grid">
+        <div class="club-card" onclick="location.href='events.html?topluluk=GMT'">
+            <img src="images/GMTlogo.jpeg" alt="GMT Logo" class="club-logo">
+            <h2>GMT</h2>
+        </div>
+
+        <div class="club-card" onclick="location.href='events.html?topluluk=Hends'">
+            <img src="images/Hendslogo.jpeg" alt="Hends Logo" class="club-logo">
+            <h2>Hends</h2>
+        </div>
+
+        <div class="club-card" onclick="location.href='events.html?topluluk=HEK'">
+            <img src="images/HEKlogo.jpeg" alt="HEK Logo" class="club-logo">
+            <h2>HEK</h2>
+        </div>
+    </div>
+</div>
+
+    </div>
+
+    <script>
+        const API_URL = "http://localhost:8000/api";
+        let currentEmail = ""; // Doğrulama için maili hafızada tutuyoruz
+
+        function showSection(id) {
+            document.getElementById('login-view').style.display = 'none';
+            document.getElementById('register-view').style.display = 'none';
+            document.getElementById('verify-view').style.display = 'none';
+            document.getElementById('selection-view').style.display = 'none';
+            document.getElementById(id).style.display = 'block';
+        }
+
+        // --- KAYIT İŞLEMİ ---
+        async function handleSignup() {
+            const email = document.getElementById('regEmail').value;
+            const password = document.getElementById('regPass').value;
+            if(!email || !password) return alert("Alanları doldurun!");
+
+            try {
+                const res = await fetch(`${API_URL}/signup`, {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({ email, password })
+                });
+                const data = await res.json();
+                if(res.ok) {
+                    currentEmail = email;
+                    alert(data.message);
+                    showSection('verify-view');
+                } else { alert(data.detail); }
+            } catch (err) { alert("Sunucu hatası!"); }
+        }
+
+        // --- DOĞRULAMA İŞLEMİ ---
+        async function handleVerify() {
+            const code = document.getElementById('otpCode').value;
+            try {
+                const res = await fetch(`${API_URL}/verify`, {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({ email: currentEmail, code: code })
+                });
+                if(res.ok) {
+                    alert("Hesabınız aktif edildi! Şimdi giriş yapabilirsiniz.");
+                    showSection('login-view');
+                } else { alert("Kod hatalı!"); }
+            } catch (err) { alert("Hata oluştu!"); }
+        }
+
+        // --- GİRİŞ İŞLEMİ ---
+        async function handleLogin() {
+            const email = document.getElementById('loginEmail').value;
+            const password = document.getElementById('loginPass').value;
+
+            try {
+                const res = await fetch(`${API_URL}/login`, {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({ email, password })
+                });
+                const user = await res.json();
+                if(res.ok) {
+                    localStorage.setItem('user', JSON.stringify(user));
+                    showSelectionView(user);
+                } else { alert(user.detail); }
+            } catch (err) { alert("Bağlantı hatası!"); }
+        }
+
+        function showSelectionView(user) {
+            showSection('selection-view');
+            document.getElementById('welcome-text').innerText = `Hoş geldin, ${user.email}`;
+        }
+
+        function logout() {
+            localStorage.removeItem('user');
+            location.reload();
+        }
+
+        // Otomatik Giriş Kontrolü
+        window.onload = () => {
+            const user = JSON.parse(localStorage.getItem('user'));
+            if(user) showSelectionView(user);
+        }
+    </script>
+</body>
+</html>

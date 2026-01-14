@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Etkinlikler | Hacettepe Web-GIS</title>
+    
+    <link rel="stylesheet" href="styles.css">
+    
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+</head>
+<body>
+    <div class="container">
+        <header style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
+            <button class="btn" onclick="history.back()" style="background: #7f8c8d;">⬅ Geri Dön</button>
+            <div id="user-tag" style="font-weight: bold; color: #2c3e50;"></div>
+        </header>
+
+        <h2 id="topluluk-title">Topluluk Etkinlikleri</h2>
+
+        <input type="text" id="searchInput" class="search-bar" placeholder="Etkinlik adına göre filtrele...">
+
+        <div id="map"></div>
+
+        <div id="loader" style="text-align: center; padding: 2rem;">Etkinlikler yükleniyor, lütfen bekleyin...</div>
+
+        <div id="eventGrid" class="card-grid"></div>
+    </div>
+
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    
+    <script src="app.js"></script>
+</body>
+</html>
