@@ -10,6 +10,16 @@
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
 </head>
 <body>
+    <div id="eventModal" class="modal">
+    <div class="modal-content login-card">
+        <span class="close-btn" onclick="closeModal()">&times;</span>
+        <h2>Yeni Etkinlik Ekle 📍</h2>
+        <p>Lütfen etkinlik detaylarını giriniz.</p>
+        <input type="text" id="modalEventName" class="search-bar" placeholder="Etkinlik Adı">
+        <input type="text" id="modalImgUrl" class="search-bar" placeholder="Görsel Linki (Opsiyonel)">
+        <button class="btn" onclick="saveEventFromModal()" style="width: 100%;">Haritaya Ekle</button>
+    </div>
+</div>
     <div class="container">
         <header style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
             <button class="btn" onclick="history.back()" style="background: #7f8c8d;">⬅ Geri Dön</button>
@@ -21,8 +31,6 @@
         <input type="text" id="searchInput" class="search-bar" placeholder="Etkinlik adına göre filtrele...">
 
         <div id="map"></div>
-
-        <div id="loader" style="text-align: center; padding: 2rem;">Etkinlikler yükleniyor, lütfen bekleyin...</div>
 
         <div id="eventGrid" class="card-grid"></div>
     </div>

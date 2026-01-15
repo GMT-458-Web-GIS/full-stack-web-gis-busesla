@@ -1,8 +1,13 @@
 const params = new URLSearchParams(window.location.search);
 const topluluk = params.get('topluluk');
 const user = JSON.parse(localStorage.getItem('user'));
+
+// Lokal Sunucu Adresi
+const API_URL = "http://127.0.0.1:8000/api/events"; 
+
 let map;
-let markers = []; // Markerları takip etmek ve temizlemek için
+let markers = []; 
+let tempLatLng; // Tıklanan koordinatları modal için hafızada tutar
 
 document.addEventListener('DOMContentLoaded', () => {
     if (!user) { location.href = 'index.html'; return; }
@@ -20,57 +25,71 @@ function initMap() {
         attribution: '&copy; OpenStreetMap'
     }).addTo(map);
 
-async function editEv(id, oldName) {
-    const newName = prompt("Yeni Etkinlik Adı:", oldName);
-    if (newName && newName !== oldName) {
-        const res = await fetch(`http://localhost:8000/api/events/${id}`, {
-            method: 'PUT',
-            headers: {'Content-Type': 'application/json'},
-            body: JSON.stringify({ etkinlik_name: newName })
-        });
-        if (res.ok) {
-            alert("Güncellendi!");
-            fetchEvents();
-        }
-    }
-}   
-
-    // Haritaya tıklama olayı
-    map.on('click', async (e) => {
+    // Haritaya tıklama olayı: Modalı açar
+    map.on('click', (e) => {
         if (user.role === 'STUDENT') return alert("Öğrenci nokta ekleyemez!");
         
-        const name = prompt("Etkinlik Adı:");
-        if (name) {
-            await fetch('http://localhost:8000/api/events', {
-                method: 'POST',
-                headers: {'Content-Type': 'application/json'},
-                body: JSON.stringify({
-                    topluluk: topluluk,
-                    etkinlik_name: name,
-                    lat: e.latlng.lat,
-                    lng: e.latlng.lng,
-                    image_url: `images/${topluluk}.jpeg` 
-                })
-            });
-            fetchEvents(); // Listeyi ve haritayı güncelle
-        }
+        tempLatLng = e.latlng;
+        document.getElementById('eventModal').style.display = 'block';
     });
 }
 
-// ... dosyanın üstündeki diğer kodlar aynı kalacak ...
+// Modalı Kapatma Fonksiyonu
+function closeModal() {
+    document.getElementById('eventModal').style.display = 'none';
+    document.getElementById('modalEventName').value = "";
+    document.getElementById('modalImgUrl').value = "";
+}
 
+// Modal Üzerinden Etkinlik Kaydetme
+async function saveEventFromModal() {
+    const name = document.getElementById('modalEventName').value;
+    const inputImg = document.getElementById('modalImgUrl').value;
+    
+    // MANTIK: Link boşsa 'Hendslogo.jpeg' gibi isimlendirmeyi kullanır
+    const img = inputImg.trim() !== "" ? inputImg : `images/${topluluk}logo.jpeg`;
+
+    if (!name) return alert("Lütfen etkinlik adını girin!");
+
+    try {
+        const res = await fetch(API_URL, {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({
+                topluluk: topluluk,
+                etkinlik_name: name,
+                lat: tempLatLng.lat,
+                lng: tempLatLng.lng,
+                image_url: img
+            })
+        });
+
+        if (res.ok) {
+            fetchEvents(); // Listeyi yenile
+            closeModal();  // Paneli kapat
+        } else {
+            alert("Ekleme işlemi başarısız!");
+        }
+    } catch (err) {
+        alert("Sunucu hatası! Uvicorn çalışıyor mu?");
+    }
+}
+
+// Etkinlikleri Çekme ve Haritaya Ekleme
 async function fetchEvents(q = '') {
     try {
-        const res = await fetch(`http://localhost:8000/api/events?topluluk=${topluluk}&q=${q}`);
+        const res = await fetch(`${API_URL}?topluluk=${topluluk}&q=${q}`);
         const data = await res.json();
         
+        // Eski markerları temizle
         markers.forEach(m => map.removeLayer(m));
         markers = [];
 
         const grid = document.getElementById('eventGrid');
+        // Kart yapısı: Resim hatasında yedek logoyu gösterir
         grid.innerHTML = data.map(ev => `
             <div class="event-card">
-                <img src="${ev.image_url}" onerror="this.src='https://via.placeholder.com/300x200?text=Etkinlik'">
+                <img src="${ev.image_url}" onerror="this.src='images/${topluluk}logo.jpeg'">
                 <div class="event-info">
                     <h3>${ev.etkinlik_name}</h3>
                     <div style="display: flex; gap: 5px; margin-top: 10px;">
@@ -84,6 +103,7 @@ async function fetchEvents(q = '') {
             </div>
         `).join('');
 
+        // Haritaya markerları yerleştir
         data.forEach(ev => {
             if (ev.lat && ev.lng) {
                 const m = L.marker([ev.lat, ev.lng])
@@ -93,30 +113,40 @@ async function fetchEvents(q = '') {
             }
         });
     } catch (err) {
-        console.error("Hata:", err);
+        console.error("Veri çekme hatası:", err);
     }
 }
 
-// PUT İşlemi: Coğrafi özelliğin özniteliğini günceller 
+// Veri Güncelleme (PUT)
 async function editEv(id, oldName) {
     const newName = prompt("Yeni Etkinlik Adı:", oldName);
     if (newName && newName !== oldName) {
-        const res = await fetch(`http://localhost:8000/api/events/${id}`, {
-            method: 'PUT', // PUT endpoint kullanımı 
-            headers: {'Content-Type': 'application/json'},
-            body: JSON.stringify({ etkinlik_name: newName })
-        });
-        if (res.ok) {
-            alert("Etkinlik başarıyla güncellendi!");
-            fetchEvents();
+        try {
+            const res = await fetch(`${API_URL}/${id}`, {
+                method: 'PUT', 
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({ etkinlik_name: newName })
+            });
+            if (res.ok) {
+                alert("Güncellendi!");
+                fetchEvents();
+            }
+        } catch (err) {
+            alert("Hata oluştu!");
         }
     }
 }
 
-// DELETE İşlemi: Mekansal özelliği siler [cite: 35]
+// Veri Silme (DELETE)
 async function deleteEv(id) {
     if (confirm("Bu etkinliği silmek istediğinize emin misiniz?")) {
-        await fetch(`http://localhost:8000/api/events/${id}`, { method: 'DELETE' });
-        fetchEvents();
+        try {
+            const res = await fetch(`${API_URL}/${id}`, { method: 'DELETE' });
+            if (res.ok) {
+                fetchEvents();
+            }
+        } catch (err) {
+            alert("Silme başarısız!");
+        }
     }
 }

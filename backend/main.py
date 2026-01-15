@@ -4,22 +4,23 @@ import random
 import smtplib
 from datetime import datetime
 from email.message import EmailMessage
-
-from fastapi import FastAPI, Body, HTTPException
-from fastapi.middleware.cors import CORSMiddleware
 from passlib.context import CryptContext
 from bson import ObjectId
 from dotenv import load_dotenv
 
-# Veritabanı bağlantı fonksiyonlarını içe aktar
-from database import db, serialize 
+from fastapi import FastAPI, Body, HTTPException
+from fastapi.middleware.cors import CORSMiddleware
 
 # .env dosyasını yükle
 load_dotenv()
 
-app = FastAPI(title="Hacettepe Topluluk Portalı API")
+# Veritabanı bağlantı fonksiyonlarını içe aktar
+from database import db, serialize 
 
-# --- 1. CORS AYARLARI (Hata Almamak İçin En Üstte Olmalı) ---
+# 1. FastAPI Tanımı
+app = FastAPI(title="Hacettepe Topluluk Portalı API - Lokal Mod")
+
+# 2. CORS AYARLARI (Lokal geliştirme için tüm kökenlere izin veriyoruz)
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
@@ -28,16 +29,16 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# --- 2. AYARLAR VE GÜVENLİK ---
+# --- AYARLAR VE GÜVENLİK ---
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
-# E-posta Ayarları (.env dosyasından veya doğrudan buradan güncelleyin)
+# E-posta Ayarları (Hala Gmail üzerinden çalışmaya devam eder)
 SMTP_SERVER = "smtp.gmail.com"
 SMTP_PORT = 587
 SENDER_EMAIL = os.getenv("SENDER_EMAIL", "busesla0107@gmail.com") 
 SENDER_PASSWORD = os.getenv("SENDER_PASSWORD", "wllu bfit quie wasj") 
 
-# --- 3. YARDIMCI FONKSİYONLAR ---
+# --- YARDIMCI FONKSİYONLAR ---
 def send_otp_email(target_email, otp_code):
     try:
         msg = EmailMessage()
@@ -51,11 +52,11 @@ def send_otp_email(target_email, otp_code):
             server.login(SENDER_EMAIL, SENDER_PASSWORD)
             server.send_message(msg)
     except Exception as e:
-        print(f"E-posta gönderme hatası: {e}")
-        # Geliştirme aşamasında mail gitmezse kodu terminale yazdıralım
-        print(f"KOD: {otp_code}")
+        # Lokal çalışırken e-posta gitmezse kodu terminale yazdırıyoruz
+        print(f"\n--- DOĞRULAMA KODU (Terminal Log): {otp_code} ---\n")
+        print(f"Hata detayı: {e}")
 
-# --- 4. AUTHENTICATION ENDPOINTLERİ ---
+# --- AUTHENTICATION ENDPOINTLERİ ---
 
 @app.post("/api/signup")
 async def signup(data: dict = Body(...)):
@@ -69,7 +70,7 @@ async def signup(data: dict = Body(...)):
     
     new_user = {
         "email": data["email"],
-        "username": data["email"].split('@')[0], # Mailin başını kullanıcı adı yap
+        "username": data["email"].split('@')[0],
         "password": hashed_password,
         "role": "STUDENT",
         "is_active": False,
@@ -79,7 +80,7 @@ async def signup(data: dict = Body(...)):
     
     await db.users.insert_one(new_user)
     send_otp_email(data["email"], otp)
-    return {"message": "Doğrulama kodu e-postanıza gönderildi."}
+    return {"message": "Doğrulama kodu gönderildi. Lütfen e-postanızı veya terminali kontrol edin."}
 
 @app.post("/api/verify")
 async def verify(data: dict = Body(...)):
@@ -104,12 +105,9 @@ async def login(credentials: dict = Body(...)):
         raise HTTPException(status_code=401, detail="Lütfen önce hesabınızı doğrulayın.")
 
     try:
-        # Doğrudan bcrypt kullanarak doğrulama (En güvenli ve sorunsuz yol)
-        # Şifreleri byte formatına çeviriyoruz
         user_password_bytes = credentials.get("password").encode('utf-8')
         stored_password_bytes = user["password"].encode('utf-8')
 
-        # Bcrypt sınırı kontrolü (72 karakter)
         if len(user_password_bytes) > 72:
             raise HTTPException(status_code=400, detail="Şifre çok uzun!")
 
@@ -122,21 +120,7 @@ async def login(credentials: dict = Body(...)):
     
     return serialize(user)
 
-# --- 5. GIS VE ETKİNLİK ENDPOINTLERİ ---
-@app.put("/api/events/{event_id}")
-async def update_event(event_id: str, data: dict = Body(...)):
-    # Sadece Admin veya ilgili Topluluk Yöneticisi güncelleyebilir (Mantıksal kural)
-    update_data = {
-        "etkinlik_name": data.get("etkinlik_name"),
-        "updated_at": datetime.utcnow()
-    }
-    result = await db.events.update_one(
-        {"_id": ObjectId(event_id)}, 
-        {"$set": update_data}
-    )
-    if result.matched_count == 0:
-        raise HTTPException(status_code=404, detail="Etkinlik bulunamadı")
-    return {"message": "Etkinlik başarıyla güncellendi"}
+# --- GIS VE ETKİNLİK ENDPOINTLERİ ---
 
 @app.get("/api/events")
 async def get_events(topluluk: str, q: str = None):
@@ -150,13 +134,26 @@ async def get_events(topluluk: str, q: str = None):
 @app.post("/api/events")
 async def create_event(event: dict = Body(...)):
     event["created_at"] = datetime.utcnow()
-    # MongoDB 2dsphere indeksi için gerekli GeoJSON formatı
     event["location"] = {
         "type": "Point",
         "coordinates": [float(event.get("lng")), float(event.get("lat"))]
     }
     result = await db.events.insert_one(event)
     return {"id": str(result.inserted_id)}
+
+@app.put("/api/events/{event_id}")
+async def update_event(event_id: str, data: dict = Body(...)):
+    update_data = {
+        "etkinlik_name": data.get("etkinlik_name"),
+        "updated_at": datetime.utcnow()
+    }
+    result = await db.events.update_one(
+        {"_id": ObjectId(event_id)}, 
+        {"$set": update_data}
+    )
+    if result.matched_count == 0:
+        raise HTTPException(status_code=404, detail="Etkinlik bulunamadı")
+    return {"message": "Etkinlik başarıyla güncellendi"}
 
 @app.delete("/api/events/{event_id}")
 async def delete_event(event_id: str):
@@ -165,4 +162,5 @@ async def delete_event(event_id: str):
 
 if __name__ == "__main__":
     import uvicorn
+    # Lokal çalışırken host "127.0.0.1" (localhost) olmalıdır
     uvicorn.run("main:app", host="127.0.0.1", port=8000, reload=True)
