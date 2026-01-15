@@ -22,7 +22,7 @@ Developed between **January 12-16, 2026**, this project focuses on managing hete
 
 ### 1. User Authentication & Verification
 The portal uses a secure authentication flow. Users register with Hacettepe credentials and must verify their account using a 6-digit OTP code sent via the system.
-> **Screenshot 1 & 2:**
+
 > ![Login Page](readmeimages/1.png)
 > ![OTP Verification](readmeimages/2.png)
 
@@ -30,39 +30,41 @@ The portal uses a secure authentication flow. Users register with Hacettepe cred
 The system supports three distinct user types managed in a NoSQL backend. Permissions are dynamically adjusted: Students can only view, while Admins/Leaders can manage data.
 * **STUDENT:** View-only access.
 * **ADMIN/LEADER:** Full management rights.
-> **Screenshot 3 & 6:**
+
 > ![Community Selection](readmeimages/3.png)
 > ![MongoDB Roles](readmeimages/6.png)
 
 ### 3. Spatial Data Infrastructure (GIS CRUD)
 Admins can interactively add event locations on the campus map using a modern UI modal. Data is stored as GeoJSON features in MongoDB.
 * **Automated Logic:** If an image URL is not provided, the system defaults to the community-specific logo.
-* * **Create (C):** Authorized users can click any location on the map. A modern modal window appears, allowing the user to enter the event name and an optional image URL. Upon saving, the coordinates (latitude/longitude) are captured and stored in the NoSQL database.
+  
+* **Create (C):** Authorized users can click any location on the map. A modern modal window appears, allowing the user to enter the event name and an optional image URL. Upon saving, the coordinates (latitude/longitude) are captured and stored in the NoSQL database.
 * **Read (R):** The system fetches all spatial features from MongoDB and renders them as interactive markers on the map. Additionally, a dynamic sidebar (event grid) lists these events with their respective community logos.
 * **Update (U):** The "Edit" (Düzenle) feature allows Admins to modify the attributes of an existing spatial point, such as renaming the event, without changing its geographical location.
 * **Delete (D):** Redundant or incorrect spatial features can be removed from the system permanently using the "Delete" (Sil) button, which triggers a DELETE request to the FastAPI backend.
-> **Screenshot 4 & 5:**
+
 > ![Map Interface](readmeimages/4.png)
 > ![Add Event Modal](readmeimages/5.png)
 
 ### 4. API Development & Validation
 The backend API exposes spatial and non-spatial resources, fully documented via **Swagger UI** and rigorously tested using **Postman** for all HTTP methods (GET, POST, PUT, DELETE).
-> **Screenshot 11 (Swagger):**
+>
 > ![Swagger UI](readmeimages/11.png)
-> **Screenshots 7, 8, 9, 10 (Postman Testing):**
+> 
+> **(Postman Testing):**
 > ![Postman GET](readmeimages/7.png) | ![Postman PUT](readmeimages/8.png) | ![Postman POST](readmeimages/9.png) | ![Postman DELETE](readmeimages/10.png)
 
 ### 5. Performance Monitoring & Stress Testing
 To observe the impact of indexing and system stability, performance tests were conducted. We monitored response times under various load conditions to ensure the FastAPI backend remains resilient.
 * **Indexing:** Implementation of `2dsphere` index reduced spatial query latency.
 * **Stress Test:** Monitored variation in response times under concurrent user simulation.
-> **Screenshot 12 & 13:**
+
 > ![Response Time Graph](readmeimages/12.png)
 > ![Stress Test Results](readmeimages/13.png)
 
 ### 6. Deployment & Future Work (AWS)
 The project is architected for cloud scalability. Preliminary configurations for AWS EC2 instances have been established to support live deployment.
-> **Screenshot 14:**
+
 > ![AWS Instance Summary](readmeimages/14.png)
 
 ## 🛠️ Tech Stack
