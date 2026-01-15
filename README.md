@@ -37,6 +37,10 @@ The system supports three distinct user types managed in a NoSQL backend. Permis
 ### 3. Spatial Data Infrastructure (GIS CRUD)
 Admins can interactively add event locations on the campus map using a modern UI modal. Data is stored as GeoJSON features in MongoDB.
 * **Automated Logic:** If an image URL is not provided, the system defaults to the community-specific logo.
+* * **Create (C):** Authorized users can click any location on the map. A modern modal window appears, allowing the user to enter the event name and an optional image URL. Upon saving, the coordinates (latitude/longitude) are captured and stored in the NoSQL database.
+* **Read (R):** The system fetches all spatial features from MongoDB and renders them as interactive markers on the map. Additionally, a dynamic sidebar (event grid) lists these events with their respective community logos.
+* **Update (U):** The "Edit" (Düzenle) feature allows Admins to modify the attributes of an existing spatial point, such as renaming the event, without changing its geographical location.
+* **Delete (D):** Redundant or incorrect spatial features can be removed from the system permanently using the "Delete" (Sil) button, which triggers a DELETE request to the FastAPI backend.
 > **Screenshot 4 & 5:**
 > ![Map Interface](readmeimages/4.png)
 > ![Add Event Modal](readmeimages/5.png)
