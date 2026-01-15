@@ -48,6 +48,10 @@ Admins can interactively add event locations on the campus map using a modern UI
 
 ### 4. API Development & Validation
 The backend API exposes spatial and non-spatial resources, fully documented via **Swagger UI** and rigorously tested using **Postman** for all HTTP methods (GET, POST, PUT, DELETE).
+
+* **Interactive API Documentation:** Once the backend server is running, you can access the full Swagger UI here:  
+* 
+    👉 [http://127.0.0.1:8000/docs](http://127.0.0.1:8000/docs)
 >
 > ![Swagger UI](readmeimages/11.png)
 > 
@@ -63,7 +67,11 @@ To observe the impact of indexing and system stability, performance tests were c
 > ![Stress Test Results](readmeimages/13.png)
 
 ### 6. Deployment & Future Work (AWS)
-The project is architected for cloud scalability. Preliminary configurations for AWS EC2 instances have been established to support live deployment.
+* **Live Backend API (Swagger UI):** [http://13.60.21.222:8000/docs](http://13.60.21.222:8000/docs)
+* **Infrastructure:** Hosted on **AWS EC2** (Ubuntu 22.04 LTS).
+* **Database:** MongoDB Atlas (Cloud).
+  
+While the cloud infrastructure and AWS EC2 instance configurations have been successfully established, the project is currently running in a local environment for final stability checks and has not yet been mapped to a public DNS for live access.
 
 > ![AWS Instance Summary](readmeimages/14.png)
 
