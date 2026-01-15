@@ -87,3 +87,9 @@ While the cloud infrastructure and AWS EC2 instance configurations have been suc
 
 ---
 **Developer:** Busesla | 
+
+
+
+## 📂 Project Presentation
+You can access the project presentation here:
+👉 [Download Presentation (PPTX)](./Full-Stack%20Web%20GIS%20Based%20Community%20Event%20Portal.pptx)
